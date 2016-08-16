@@ -102,7 +102,8 @@ namespace netDxf.Entities
             this.secondRefPoint = new Vector2(ocsPoint.X, ocsPoint.Y);
             this.offset = offset;
             if (style == null)
-                return;
+                throw new ArgumentNullException("nameofreplace", "The Dimension style cannot be null.");
+            this.style = style;
             this.normal = normal;
             this.elevation = ocsPoint.Z;
         }

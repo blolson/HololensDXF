@@ -162,7 +162,8 @@ namespace netDxf.Collections
         public void Add(EntityObject item)
         {
             if (this.OnBeforeAddItemEvent(item))
-                return;
+                throw new ArgumentException("The entity cannot be added to the collection.", "nameofreplace");
+            this.innerArray.Add(item);
             this.OnAddItemEvent(item);
         }
 
@@ -173,7 +174,8 @@ namespace netDxf.Collections
         public void AddRange(IList<EntityObject> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException("nameof");            // we will make room for so the collection will fit without having to resize the internal array during the Add method
+                throw new ArgumentNullException("nameofreplace");
+            // we will make room for so the collection will fit without having to resize the internal array during the Add method
             this.innerArray.Capacity += collection.Count;
             foreach (EntityObject item in collection)
                 this.Add(item);
@@ -190,7 +192,8 @@ namespace netDxf.Collections
                 throw new ArgumentOutOfRangeException(string.Format("The parameter index {0} must be in between {1} and {2}.", index, 0, this.innerArray.Count));
             if(this.OnBeforeRemoveItemEvent(this.innerArray[index])) return;
             if (this.OnBeforeAddItemEvent(item))
-                return;
+                throw new ArgumentException("The entity cannot be added to the collection.", "nameofreplace");
+            this.OnRemoveItemEvent(this.innerArray[index]);
             this.innerArray.Insert(index, item);
             this.OnAddItemEvent(item);
         }

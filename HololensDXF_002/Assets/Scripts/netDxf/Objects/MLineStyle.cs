@@ -119,10 +119,12 @@ namespace netDxf.Objects
             : base(name, DxfObjectCode.MLineStyle, true)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("nameof", "The multiline style name should be at least one character long.");
+                throw new ArgumentNullException("nameofreplace", "The multiline style name should be at least one character long.");
             if (elements == null)
-                throw new ArgumentNullException("nameof");         if (elements.Count < 1)
-                throw new ArgumentOutOfRangeException("nameof");     
+                throw new ArgumentNullException("nameofreplace");
+            if (elements.Count < 1)
+                throw new ArgumentOutOfRangeException("nameofreplace", elements.Count, "The elements list must have at least one element.");
+            
             this.elements = new ObservableCollection<MLineStyleElement>(elements.Count);
             this.elements.BeforeAddItem += this.Elements_BeforeAddItem;
             this.elements.AddItem += this.Elements_AddItem;

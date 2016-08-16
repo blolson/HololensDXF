@@ -39,9 +39,10 @@ namespace SMTP.Async
             mail.Subject = "Hololens DXF Download #323";
             mail.Body = "Your AutoCad-ready .dxf file is attached to this email.";
 
-            if (System.IO.File.Exists(Application.persistentDataPath + "\test.dxf"))
+            if (System.IO.File.Exists(Application.persistentDataPath + "/test.dxf"))
             {
-                Attachment attachment = new System.Net.Mail.Attachment(Application.persistentDataPath + "\test.dxf");
+                Debug.Log("Found File");
+                Attachment attachment = new Attachment(Application.persistentDataPath + "/test.dxf");
                 mail.Attachments.Add(attachment);
             }
 
@@ -63,7 +64,7 @@ namespace SMTP.Async
 SendCompletedEventHandler(SendCompletedCallback);
 
             string userState = "test message 1";
-            smtpServer.SendAsync(mail, userState);
+            //smtpServer.SendAsync(mail, userState);
 
             // Clean up.
             mail.Dispose();

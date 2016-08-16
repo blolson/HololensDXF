@@ -948,12 +948,12 @@ namespace netDxf
         internal void AddEntity(EntityObject entity, bool isBlockEntity, bool assignHandle)
         {
             // null entities are not allowed
-            if (entity == null)
-                return;
+            if (entity == null) 
+                throw new ArgumentNullException("nameofreplace");
 
             // entities already owned by another document are not allowed
             if (entity.Owner != null && !isBlockEntity)
-                throw new ArgumentException("The entity already belongs to a document. Clone it instead.", "nameof");
+                throw new ArgumentException("The entity already belongs to a document. Clone it instead.", "nameofreplace");
             
             // assign a handle
             if (assignHandle || string.IsNullOrEmpty(entity.Handle))
