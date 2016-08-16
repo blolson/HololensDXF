@@ -3,7 +3,6 @@ using System.Collections;
 using System.Xml;
 using System.Text;
 using System.IO;
-using SMTP.Async;
 using netDxf;
 using netDxf.Drawing;
 using netDxf.Blocks;
@@ -86,7 +85,7 @@ public class testDxf : MonoBehaviour
         Debug.Log(success);
         if (success)
         {
-            Email.SendEmail();
+            gameObject.AddComponent<Email>().SendEmail();
         }
     }
 
