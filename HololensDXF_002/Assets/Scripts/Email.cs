@@ -1,8 +1,10 @@
-﻿using System;
+﻿
+
+
+using UnityEngine;
 using System.Net.Mail;
 using System.ComponentModel;
 using System.Net;
-using UnityEngine;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 
@@ -64,7 +66,7 @@ namespace SMTP.Async
 SendCompletedEventHandler(SendCompletedCallback);
 
             string userState = "test message 1";
-            //smtpServer.SendAsync(mail, userState);
+            smtpServer.SendAsync(mail, userState);
 
             // Clean up.
             mail.Dispose();
