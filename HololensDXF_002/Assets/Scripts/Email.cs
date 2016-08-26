@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.IO;
 using System.Collections;
+using System.Text;
 
 public class Email : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class Email : MonoBehaviour
 
     IEnumerator UploadLevel()
     {
+
         //converting the xml to bytes to be ready for upload
         byte[] dxfData = UnityEngine.Windows.File.ReadAllBytes(Application.persistentDataPath.ToString() + "/test.dxf");
 
@@ -57,7 +59,14 @@ public class Email : MonoBehaviour
             {
                 yield return new WaitForSeconds(5);
                 //change the url to the url of the folder you want it the dxfs to be stored, the one you specified in the php file
-                WWW w2 = new WWW("http://hololens.bladeolson.com/dxf/" + fileName);
+                form = new WWWForm();
+                form.AddField("action", "get");
+                form.AddField("file", "file");
+                form.AddBinaryData("file", new byte[0], fileName, "application/dxf");
+
+                Debug.Log("binary data added ");
+                //change the url to the url of the php file
+                WWW w2 = new WWW("http://hololens.bladeolson.com/upload.php", form);
                 yield return w2;
                 if (w2.error != null)
                 {
@@ -69,6 +78,7 @@ public class Email : MonoBehaviour
                     //then if the retrieval was successful, validate its content to ensure the level file integrity is intact
                     if (w2.text != null && w2.text != "")
                     {
+                        Debug.Log(w2.text);
                         if (w2.text.Contains("Dxf"))
                         {
                             //and finally announce that everything went well
