@@ -15,7 +15,8 @@ namespace HoloToolkit.Unity
         public GameObject Cursor;
 
         [Tooltip("Model to display the direction to the object this script is attached to.")]
-        public GameObject DirectionIndicatorObject;
+        public GameObject DirectionIndicatorPrefab;
+        private GameObject DirectionIndicatorObject;
 
         [Tooltip("Color to shade the direction indicator.")]
         public Color DirectionIndicatorColor = Color.blue;
@@ -44,19 +45,34 @@ namespace HoloToolkit.Unity
                 Debug.LogError("Please include a GameObject for the cursor.");
             }
 
-            if (DirectionIndicatorObject == null)
+            if (DirectionIndicatorPrefab == null)
             {
                 Debug.LogError("Please include a GameObject for the Direction Indicator.");
             }
 
             // Instantiate the direction indicator.
-            DirectionIndicatorObject = InstantiateDirectionIndicator(DirectionIndicatorObject);
+            DirectionIndicatorObject = InstantiateDirectionIndicator(DirectionIndicatorPrefab);
 
             if (DirectionIndicatorObject == null)
             {
                 Debug.LogError("Direction Indicator failed to instantiate.");
                 return;
             }
+        }
+
+        public void OnEnable()
+        {
+            if (DirectionIndicatorObject == null)
+            {
+                // Instantiate the direction indicator.
+                DirectionIndicatorObject = InstantiateDirectionIndicator(DirectionIndicatorPrefab);
+                return;
+            }
+        }
+
+        public void OnDisable()
+        {
+            Destroy(DirectionIndicatorObject);
         }
 
         public void OnDestroy()
@@ -163,6 +179,18 @@ namespace HoloToolkit.Unity
             rotation = Quaternion.LookRotation(
                 Camera.main.transform.forward,
                 cursorIndicatorDirection) * directionIndicatorDefaultRotation;
+        }
+
+        public bool DoesDirectionIndicatorExist()
+        {
+            if (DirectionIndicatorObject != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

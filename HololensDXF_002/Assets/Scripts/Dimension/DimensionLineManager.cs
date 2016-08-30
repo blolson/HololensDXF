@@ -8,11 +8,12 @@ using System.Collections.Generic;
 public class DimensionLineManager : Singleton<DimensionLineManager>, IDimensionGeometry
 {
     // save all lines in scene
-    private Stack<DimensionLine> Lines = new Stack<DimensionLine>();
+    private Stack<ARMakeLine> Lines = new Stack<ARMakeLine>();
 
-    private DimensionPoint lastPoint;
+    public ARMakePoint lastPoint;
 
     private const float defaultLineScale = 0.005f;
+    private const float metersToInches = 39.3701f;
 
     // place point and lines
     public void AddPoint(GameObject LinePrefab, GameObject PointPrefab, GameObject TextPrefab)
@@ -20,29 +21,29 @@ public class DimensionLineManager : Singleton<DimensionLineManager>, IDimensionG
 
         var hitPoint = GazeManager.Instance.HitInfo.point;
 
-
         var point = (GameObject)Instantiate(PointPrefab, hitPoint, Quaternion.identity);
         if (lastPoint != null && lastPoint.IsStart)
         {
-            var centerPos = (lastPoint.Position + hitPoint) * 0.5f;
+            Debug.Log(lastPoint.position + " " + hitPoint);
+            var centerPos = (lastPoint.position + hitPoint) * 0.5f;
 
             var directionFromCamera = centerPos - Camera.main.transform.position;
 
-            var distanceA = Vector3.Distance(lastPoint.Position, Camera.main.transform.position);
+            var distanceA = Vector3.Distance(lastPoint.position, Camera.main.transform.position);
             var distanceB = Vector3.Distance(hitPoint, Camera.main.transform.position);
 
             Debug.Log("A: " + distanceA + ",B: " + distanceB);
             Vector3 direction;
             if (distanceB > distanceA || (distanceA > distanceB && distanceA - distanceB < 0.1))
             {
-                direction = hitPoint - lastPoint.Position;
+                direction = hitPoint - lastPoint.position;
             }
             else
             {
-                direction = lastPoint.Position - hitPoint;
+                direction = lastPoint.position - hitPoint;
             }
 
-            var distance = Vector3.Distance(lastPoint.Position, hitPoint);
+            var distance = Vector3.Distance(lastPoint.position, hitPoint);
             var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
             line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
             line.transform.Rotate(Vector3.down, 90f);
@@ -53,7 +54,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>, IDimensionG
 
             //unit is meter
             tip.transform.Translate(Vector3.up * 0.05f);
-            tip.GetComponent<TextMesh>().text = distance + "m";
+            tip.GetComponent<TextMesh>().text = (distance* metersToInches) + "in";
 
             var root = new GameObject();
             lastPoint.Root.transform.parent = root.transform;
@@ -61,30 +62,24 @@ public class DimensionLineManager : Singleton<DimensionLineManager>, IDimensionG
             point.transform.parent = root.transform;
             tip.transform.parent = root.transform;
 
-            Lines.Push(new DimensionLine
-            {
-                Start = lastPoint.Position,
-                End = hitPoint,
-                Root = root,
-                Distance = distance
-            });
+            ARMakeLine tempLine = line.GetComponent<ARMakeLine>();
+            tempLine.points.Add(lastPoint);
+            tempLine.points.Add(new ARMakePoint(hitPoint));
+            tempLine.Root = root;
+            tempLine.Distance = distance;
+            Lines.Push(tempLine);
 
-            lastPoint = new DimensionPoint
-            {
-                Position = hitPoint,
-                Root = point,
-                IsStart = false
-            };
-
+            lastPoint = point.GetComponent<ARMakePoint>();
+            lastPoint.position = point.transform.position;
+            lastPoint.IsStart = false;
+            lastPoint.Root = lastPoint.gameObject;
         }
         else
         {
-            lastPoint = new DimensionPoint
-            {
-                Position = hitPoint,
-                Root = point,
-                IsStart = true
-            };
+            lastPoint = point.GetComponent<ARMakePoint>();
+            lastPoint.position = point.transform.position;
+            lastPoint.IsStart = true;
+            lastPoint.Root = lastPoint.gameObject;
         }
     }
 
@@ -122,16 +117,4 @@ public class DimensionLineManager : Singleton<DimensionLineManager>, IDimensionG
             lastPoint = null;
         }
     }
-}
-
-
-public struct DimensionLine
-{
-    public Vector3 Start { get; set; }
-
-    public Vector3 End { get; set; }
-
-    public GameObject Root { get; set; }
-
-    public float Distance { get; set; }
 }

@@ -46,7 +46,7 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
     private void Update()
     {
         // Check to see if the spatial mapping data has been processed yet.
-        if (!meshesProcessed)
+        if (!meshesProcessed && SceneStateManager.Instance.currentState != SceneStateManager.SceneStates.Start)
         {
             // Check to see if enough scanning time has passed
             // since starting the observer.
@@ -84,10 +84,12 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
     {
         // Collection of floor planes that we can use to set horizontal items on.
         List<GameObject> floors = new List<GameObject>();
+        List<GameObject> walls = new List<GameObject>();
         floors = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Floor);
+        walls = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Wall);
 
         // Check to see if we have enough floors (minimumFloors) to start processing.
-        if (floors.Count >= minimumFloors && floors.Count >= minimumWalls)
+        if (walls.Count >= minimumWalls)
         {
             // Reduce our triangle count by removing any triangles
             // from SpatialMapping meshes that intersect with active planes.
@@ -97,12 +99,42 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
             //Blade: Commenting this out because we don't want the player to see the mesh right now
             //SpatialMappingManager.Instance.SetSurfaceMaterial(secondaryMaterial);
 
+            //Blade: Stop trying to regenerate the mesh, the player has decided to move on to the next step
+            if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.Scan)
+            {
+                SceneStateManager.Instance.Progress();
+                return;
+            }
+            else if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.Generate)
+            {
+                SceneStateManager.Instance.Progress();
+                return;
+            }
+
+#if !UNITY_EDITOR
             // Re-enter scanning mode so the user can find more surfaces before processing.
             SpatialMappingManager.Instance.StartObserver();
 
             // Re-process spatial data after scanning completes.
             meshesProcessed = false;
+#endif
         }
+    }
+
+    public void StopScanning()
+    {
+        SceneStateManager.Instance.Progress();
+        if (SpatialMappingManager.Instance.IsObserverRunning())
+        {
+            // Stop the observer.
+            SpatialMappingManager.Instance.StopObserver();
+        }
+
+        // Call CreatePlanes() to generate planes.
+        CreatePlanes();
+
+        // Set meshesProcessed to true.
+        meshesProcessed = true;
     }
 
     /// <summary>

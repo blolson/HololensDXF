@@ -67,7 +67,7 @@ public class HackGestureManager : Singleton<HackGestureManager>
     private void OnTap()
     {
         //if user tap tip text, relative line and geometry will hide
-        if (focusedObject != null && focusedObject.tag.Equals("Tip"))
+        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag.Equals("Tip"))
         {
             focusedObject.SendMessage("OnSelect");
         }

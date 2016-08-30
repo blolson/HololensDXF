@@ -4,19 +4,19 @@ using UnityEngine.Events;
 using HoloToolkit.Unity;
 using System.Collections;
 
-public class SceneStateManager : MonoBehaviour {
+public partial class SceneStateManager : Singleton<SceneStateManager> {
 
     public KeywordManager keywordManager;
-    public enum SceneStates { Start, Scan, Generate, Edit, Email, Restart };
+    public enum SceneStates { Start, Scan, ScanGood, Generate, GenerateStart, Edit, Email, Restart };
     public SceneStates currentState;
 
     [System.Serializable]
     public struct StateKeywords
     {
-        [Tooltip("The state where this keyword is active.")]
-        public SceneStates activeState;
         [Tooltip("The keyword to recognize.")]
         public string Keyword;
+        [Tooltip("The state where this keyword is active.")]
+        public SceneStates activeState;
         [Tooltip("The KeyCode to recognize.")]
         public KeyCode KeyCode;
         [Tooltip("The UnityEvent to be invoked when the keyword is recognized.")]
@@ -28,7 +28,7 @@ public class SceneStateManager : MonoBehaviour {
     {
         [Tooltip("For readability")]
         public string eventName;
-        [Tooltip("The state where this call should be made.")]
+        [Tooltip("When this state is entered, this event will be triggered.")]
         public SceneStates activeState;
         [Tooltip("The UnityEvent to be invoked when the state is changed.")]
         public UnityEvent response;
@@ -72,11 +72,12 @@ public class SceneStateManager : MonoBehaviour {
             currentState = nextState;
 
 
-
+        Debug.Log(currentState);
 
         foreach (StateChangeHooks sch in StateEventHooks)
         {
-            sch.response.Invoke();
+            if(sch.activeState == currentState)
+                sch.response.Invoke();
         }
 
 

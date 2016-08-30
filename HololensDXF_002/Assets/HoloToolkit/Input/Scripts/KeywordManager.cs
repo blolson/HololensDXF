@@ -112,6 +112,10 @@ namespace HoloToolkit.Unity
 
         public void UpdateKeywordRecognizer(KeywordAndResponse[] newKeywords)
         {
+            StopKeywordRecognizer();
+            if(keywordRecognizer != null)
+                keywordRecognizer.Dispose();
+
             KeywordsAndResponses = newKeywords;
             if (KeywordsAndResponses.Length > 0)
             {
