@@ -11,6 +11,7 @@ App/
 UWP/
 project.json
 project.lock.json
+WindowsStoreApp/
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
