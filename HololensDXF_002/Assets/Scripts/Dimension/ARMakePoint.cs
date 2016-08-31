@@ -8,6 +8,8 @@ public class ARMakePoint : MonoBehaviour {
     //Blade: Not sure what "Root" does
     public bool IsStart;
 
+    private TraceOutline tracer;
+
     public ARMakePoint()
     {
         
@@ -20,8 +22,9 @@ public class ARMakePoint : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-	
-	}
+        tracer = gameObject.GetComponentInChildren<TraceOutline>();
+        tracer.gameObject.SetActive(false);
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -30,15 +33,31 @@ public class ARMakePoint : MonoBehaviour {
 
     public void OnGazeEnter()
     {
-        ARMakeLineGuide.Instance.UpdateDestination(this);
+        if (DimensionManager.Instance.mode == ARMakeMode.AddLine)
+        {
+            ARMakeLineGuide.Instance.UpdateDestination(this);
+            tracer.FadeIn();
+        }
+        else if (DimensionManager.Instance.mode == ARMakeMode.Free)
+        {
+            tracer.FadeIn();
+        }
     }
 
     public void OnGazeLeave()
     {
-        ARMakeLineGuide.Instance.UpdateDestination();
+        Debug.Log("OnGazeLeave: " + gameObject.name);
+        if (DimensionManager.Instance.mode == ARMakeMode.AddLine)
+        {
+            ARMakeLineGuide.Instance.UpdateDestination();
+            tracer.FadeOut();
+        }
+        else if (DimensionManager.Instance.mode == ARMakeMode.Free)
+        {
+            tracer.FadeOut();
+        }
     }
 
-    // Update is called once per frame
     public void RemoveLine(ARMakeLine _line)
     {
         if(lineList.Contains(_line))
@@ -47,7 +66,6 @@ public class ARMakePoint : MonoBehaviour {
         }
     }
 
-    // Update is called once per frame
     public void AddLine(ARMakeLine _line, ARMakePoint _deletePoint = null)
     {
         if (lineList.Contains(_line))
@@ -57,20 +75,20 @@ public class ARMakePoint : MonoBehaviour {
         }
         else
         {
+            Debug.Log(this + " " + _deletePoint);
             var _newLine = _line.AddPoint(this, _deletePoint);
             lineList.Add(_newLine);
-            Debug.Log("Just created this line: " + _newLine + " from these points:");
-            _newLine.PrintPoints();
+            //Debug.Log("Just created this line: " + _newLine + " from these points:");
         }
     }
 
-    // Update is called once per frame
     void OnDestroy()
     {
-        Debug.Log("Removing Points");
+        //Debug.Log("Removing Points");
         foreach (ARMakeLine _line in lineList)
         {
-            _line.RemovePoint(this);
+            if(_line != null)
+                _line.RemovePoint(this);
         }
     }
 }

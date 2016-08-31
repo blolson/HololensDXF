@@ -71,7 +71,6 @@ public partial class SceneStateManager : Singleton<SceneStateManager> {
         else
             currentState = nextState;
 
-
         Debug.Log(currentState);
 
         foreach (StateChangeHooks sch in StateEventHooks)

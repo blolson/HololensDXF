@@ -36,10 +36,15 @@ public class ARMakeLine : MonoBehaviour {
             pointList.Remove(_point);
         }
 
-        if (pointList.Count < 2)
+        if (pointList.Count <= 0)
         {
-            Debug.Log("Point List is too low, now destroying this line");
-            Destroy(gameObject);
+            Debug.Log("All points have been removed and this line has conceivably already been marked for destruction.");
+            return;
+        }
+        else if (pointList.Count < 2)
+        {
+            Debug.Log(gameObject.name + " Point List is too low, now destroying this line " + pointList.Count);
+            DestroyImmediate(gameObject);
         }
     }
 
@@ -48,23 +53,23 @@ public class ARMakeLine : MonoBehaviour {
     {
         if (pointList.Contains(_point))
         {
-            Debug.LogError(gameObject.name + " This point was already added.");
+            //Debug.Log(gameObject.name + " This point was already added.");
             return this;
         }
         else if (pointList.Count > 1)
         {
-            Debug.Log("There's already two points in this line's point list");
+            //Debug.Log("There's already two points in this line's point list");
             if (_deletePoint == null)
             {
                 Debug.LogError("Didn't provide a _deletePoint in a list that already has 2 points, bailing out");
                 return null;
             }
-
+            Debug.Log(_point.name + " " + _deletePoint.name);
             return GenerateNew(_point, _deletePoint);
         }
         else
         {
-            Debug.Log("Adding new _point: " + _point);
+            //Debug.Log("Adding new _point: " + _point);
             return this;
         }
     }
@@ -88,14 +93,19 @@ public class ARMakeLine : MonoBehaviour {
         {
             foreach (ARMakePoint point in pointList)
             {
-                if (point != _deletePoint)
+                if (point != _deletePoint && point != null)
                 {
                     savePoint = pointList.IndexOf(point);
+                    Debug.Log(savePoint);
+                    Debug.Log(pointList[savePoint]);
                     break;
                 }
             }
         }
 
+        Debug.Log(pointList[savePoint]);
+
+        Debug.Log(_point.name + " " + _deletePoint.name + " " + savePoint);
         var centerPos = (pointList[savePoint].transform.position + _point.transform.position) * 0.5f;
 
         var directionFromCamera = centerPos - Camera.main.transform.position;
@@ -118,18 +128,14 @@ public class ARMakeLine : MonoBehaviour {
         var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
         line.name = Path.GetRandomFileName();
 
-        Debug.Log("Just generated " + line.name);
+        //Debug.Log("Just generated " + line.name);
         var lineScript = line.GetComponent<ARMakeLine>();
 
         line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
         line.transform.Rotate(Vector3.down, 90f);
 
-        PrintPoints();
-        lineScript.PrintPoints();
         lineScript.pointList.Add(pointList[savePoint]);
         lineScript.pointList.Add(_point);
-        PrintPoints();
-        lineScript.PrintPoints();
 
         pointList[savePoint].AddLine(lineScript);
         _point.AddLine(lineScript);
@@ -188,6 +194,7 @@ public class ARMakeLine : MonoBehaviour {
     // Update is called once per frame
     void OnDestroy()
     {
+        Debug.Log("OnDestroy " + gameObject.name);
         foreach (ARMakePoint _point in pointList)
         {
             _point.RemoveLine(this);

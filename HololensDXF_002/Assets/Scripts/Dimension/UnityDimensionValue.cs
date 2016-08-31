@@ -14,15 +14,7 @@ public class UnityDimensionValue : Singleton<UnityDimensionValue>
     void Start()
     {
         text = GetComponent<TextMesh>();
-        switch (DimensionManager.Instance.mode)
-        {
-            case DimensionMode.Line:
-                text.text = LineMode;
-                break;
-            default:
-                text.text = PloygonMode;
-                break;
-        }
+        text.text = LineMode;
     }
 
     // Update is called once per frame
@@ -32,36 +24,26 @@ public class UnityDimensionValue : Singleton<UnityDimensionValue>
         {
             // if you want log the position of mode tip text, just uncomment it.
             // Debug.Log("pos: " + gameObject.transform.position);
-            switch (DimensionManager.Instance.mode)
-            {
-                case DimensionMode.Line:
-                    if (!text.text.Contains(LineMode))
-                        text.text = LineMode;
-                    break;
-                default:
-                    if (!text.text.Contains(PloygonMode))
-                        text.text = PloygonMode;
-                    break;
-            }
+            text.text = LineMode;
+        }
 
-            var render = GetComponent<MeshRenderer>().material;
+        var render = GetComponent<MeshRenderer>().material;
+        fadeTime = 100;
+        // fade tip text
+        if (fadeTime == 0)
+        {
+            var color = render.color;
             fadeTime = 100;
-            // fade tip text
-            if (fadeTime == 0)
-            {
-                var color = render.color;
-                fadeTime = 100;
-                color.a = 1f;
-                render.color = color;
-                gameObject.SetActive(false);
-            }
-            else
-            {
-                var color = render.color;
-                color.a -= 0.01f;
-                render.color = color;
-                fadeTime--;
-            }
+            color.a = 1f;
+            render.color = color;
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            var color = render.color;
+            color.a -= 0.01f;
+            render.color = color;
+            fadeTime--;
         }
     }
 }

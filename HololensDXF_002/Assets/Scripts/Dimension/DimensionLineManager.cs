@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using HoloToolkit.Unity;
 using System.Collections.Generic;
+using System.IO;
 
 /// <summary>
 /// mananger all lines in the scene
@@ -21,7 +22,11 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
     // place point and lines
     public void AddPoint()
     {
+        DimensionManager.Instance.mode = ARMakeMode.AddLine;
+
         var point = (GameObject)Instantiate(PointPrefab, GazeManager.Instance.HitInfo.point, Quaternion.identity);
+        point.name = Path.GetRandomFileName();
+        bool endOnPoint = false;
 
         if (GazeManager.Instance.HitInfo.collider != null)
         {
@@ -31,15 +36,16 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
                 point.transform.position = oldPoint.transform.position;
                 foreach (ARMakeLine oldLine in oldPoint.lineList)
                 {
-                    point.GetComponent<ARMakePoint>().lineList.Add(oldLine);
+                    point.GetComponent<ARMakePoint>().AddLine(oldLine, oldPoint);
                 }
-                Destroy(oldPoint);
+                DestroyImmediate(oldPoint.gameObject);
+                endOnPoint = true;
             }
         }
 
         if (lastPoint != null)
         {
-            Debug.Log(lastPoint.position + " " + point.transform.position);
+            //Debug.Log(lastPoint.position + " " + point.transform.position);
             var centerPos = (lastPoint.position + point.transform.position) * 0.5f;
 
             var directionFromCamera = centerPos - Camera.main.transform.position;
@@ -47,7 +53,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             var distanceA = Vector3.Distance(lastPoint.position, Camera.main.transform.position);
             var distanceB = Vector3.Distance(point.transform.position, Camera.main.transform.position);
 
-            Debug.Log("A: " + distanceA + ",B: " + distanceB);
+            //Debug.Log("A: " + distanceA + ",B: " + distanceB);
             Vector3 direction;
             if (distanceB > distanceA || (distanceA > distanceB && distanceA - distanceB < 0.1))
             {
@@ -87,7 +93,10 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             lastPoint.position = point.transform.position;
             lastPoint.IsStart = false;
 
-            ARMakeLineGuide.Instance.UpdateSource(lastPoint);
+            if (endOnPoint)
+                Close();
+            else
+                ARMakeLineGuide.Instance.UpdateSource(lastPoint);
         }
         else
         {
@@ -102,6 +111,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
     // delete latest placed lines
     public void Close()
     {
+        DimensionManager.Instance.mode = ARMakeMode.Free;
         ARMakeLineGuide.Instance.EndGuide();
         lastPoint = null;
     }

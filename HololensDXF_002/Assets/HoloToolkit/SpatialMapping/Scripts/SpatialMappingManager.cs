@@ -189,6 +189,13 @@ namespace HoloToolkit.Unity
 #endif
         }
 
+        public void RestartObserver()
+        {
+#if UNITY_EDITOR
+            StartTime = Time.time;
+#endif
+        }
+
         /// <summary>
         /// Instructs the SurfaceObserver to stop updating the SpatialMapping mesh.
         /// </summary>

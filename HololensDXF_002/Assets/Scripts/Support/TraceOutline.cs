@@ -8,6 +8,9 @@ public class TraceOutline : MonoBehaviour {
     public float animationSpeed = 1f;
     public float lerpEnd = 1f;
     public float fadeOutSpeed = 0.1f;
+    public float fadeInSpeed = 2.0f;
+    public bool fateOutOnGazeEnter = true;
+    public bool activeOnSpawn = false;
 
     private TrailRenderer trailRenderer;
     private Bounds bounds;
@@ -19,7 +22,8 @@ public class TraceOutline : MonoBehaviour {
     private int destTotal;
     private Vector3 curDest;
 
-    private float currentFadeOutTime = 0;
+    private enum fadeState { fadeOut, fadeIn, inactive };
+    private fadeState visualState = fadeState.inactive;
 
     // Use this for initialization
     void Start () {
@@ -30,7 +34,8 @@ public class TraceOutline : MonoBehaviour {
             return;
         }
         Debug.Log("Disabling TraceOutline, don't have a list of destination points to follow");
-        gameObject.SetActive(false);
+        if(!activeOnSpawn)
+            gameObject.SetActive(false);
     }
 	
 	// Update is called once per frame
@@ -45,26 +50,60 @@ public class TraceOutline : MonoBehaviour {
             lerp = 0;
         }
 
-        if (gameObject.activeInHierarchy && currentFadeOutTime > 0)
+        if (gameObject.activeInHierarchy && visualState == fadeState.fadeOut)
         {
             var render = trailRenderer.material;
             var color = render.color;
-            color.a -= Time.deltaTime * fadeOutSpeed;
+            color.a = Mathf.Max(color.a - (Time.deltaTime * fadeOutSpeed), 0);
             render.color = color;
             if (color.a <= 0f)
             {
-                currentFadeOutTime = 0;
+                visualState = fadeState.inactive;
                 gameObject.SetActive(false);
+            }
+        }
+        else if (gameObject.activeInHierarchy && visualState == fadeState.fadeIn)
+        {
+            var render = trailRenderer.material;
+            var color = render.color;
+            color.a = Mathf.Min(color.a + (Time.deltaTime * fadeInSpeed), 1);
+            render.color = color;
+            if (color.a >= 1f)
+            {
+                visualState = fadeState.inactive;
             }
         }
     }
 
     public void OnGazeEnter()
     {
+        if (gameObject.activeInHierarchy && fateOutOnGazeEnter)
+        {
+            visualState = fadeState.fadeOut;
+        }
+    }
+
+    public void FadeOut()
+    {
         if (gameObject.activeInHierarchy)
         {
-            currentFadeOutTime = 1;
+            visualState = fadeState.fadeOut;
         }
+    }
+
+    public void FadeIn()
+    {
+        gameObject.SetActive(true);
+        if (trailRenderer == null)
+        {
+            trailRenderer = gameObject.GetComponent<TrailRenderer>();
+            curDest = destinationArray[0].transform.position;
+        }
+        var render = trailRenderer.material;
+        var color = render.color;
+        color.a = 0f;
+        render.color = color;
+        visualState = fadeState.fadeIn;
     }
 
 }

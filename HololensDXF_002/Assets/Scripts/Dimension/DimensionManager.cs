@@ -11,7 +11,7 @@ using System.IO;
 public class DimensionManager : Singleton<DimensionManager>
 {
     private DimensionLineManager manager;
-    public DimensionMode mode;
+    public ARMakeMode mode;
 
     // set up prefabs
     public GameObject LinePrefab;
@@ -76,12 +76,7 @@ public class DimensionManager : Singleton<DimensionManager>
     void Start()
     {
         // inti measure mode
-        switch (mode)
-        {
-            default:
-                manager = DimensionLineManager.Instance;
-                break;
-        }
+        manager = DimensionLineManager.Instance;
     }
 
     // place spatial point
@@ -142,6 +137,12 @@ public class DimensionManager : Singleton<DimensionManager>
                 //Debug.Log(ap.transform.TransformPoint(vert));
                 allVerts.Add(new CombinableVert(ap.transform.TransformPoint(vert), meshID));
             }
+        }
+
+        GameObject[] activePlanes = planeConverter.ActivePlanes.ToArray();
+        for( int p = 0; p < activePlanes.Length; p++)
+        {
+            Destroy(activePlanes[p]);
         }
 
         CombinableVert[] compareVerts = new CombinableVert[allVerts.Count];
@@ -305,7 +306,7 @@ public class DimensionManager : Singleton<DimensionManager>
                     ARMakePoint removePoint = PointList[PointList.IndexOf(pointArray[i])];
                     foreach (ARMakeLine _line in removePoint.lineList)
                     {
-                        Debug.Log("Starting on this line now: " + _line.name + " " + removePoint.lineList.Count);
+                        //Debug.Log("Starting on this line now: " + _line.name + " " + removePoint.lineList.Count);
                         pointArray[j].AddLine(_line, removePoint);
                     }
                     DestroyImmediate(removePoint.gameObject);
@@ -313,10 +314,12 @@ public class DimensionManager : Singleton<DimensionManager>
             }
         }
 
+        SceneStateManager.Instance.Progress();
     }
 }
 
-public enum DimensionMode
+public enum ARMakeMode
 {
-    Line
+    Free,
+    AddLine
 }

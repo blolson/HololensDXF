@@ -49,5 +49,6 @@ public class ARMakeLineGuide : Singleton<ARMakeLineGuide>
     public void EndGuide()
     {
         guide.enabled = false;
+        destination = originalDestination;
     }
 }
