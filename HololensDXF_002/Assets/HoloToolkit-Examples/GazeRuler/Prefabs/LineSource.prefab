@@ -24,7 +24,7 @@ GameObject:
   - 23: {fileID: 23000011516511122}
   - 114: {fileID: 114000012194436662}
   m_Layer: 0
-  m_Name: Line
+  m_Name: LineSource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,5 +103,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointList: []
-  LinePrefab: {fileID: 1000013919465970, guid: 84b1196e14680a141b40e6385118c3a4, type: 2}
+  LinePrefab: {fileID: 1000013919465970}
   Distance: 0

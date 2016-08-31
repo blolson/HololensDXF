@@ -3,6 +3,7 @@ using System.Collections;
 using HoloToolkit.Unity;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 /// <summary>
 /// manager all measure tools here
@@ -203,77 +204,6 @@ public class DimensionManager : Singleton<DimensionManager>
         }
         Debug.Log("Starting Value: " + compareVerts.Length + " and Ending Value: " + ending);
 
-
-        CombinableVert[] cleanedVerts = new CombinableVert[verts.Length];
-        verts.CopyTo(cleanedVerts, 0);
-        for (int i = 0; i < verts.Length; i++)
-        {
-            for (int j = i; j < verts.Length; j++)
-            {
-                if (j != i && verts[i].meshID != -1 && verts[j].meshID != -1)
-                {
-                    for (int vOut = 0; vOut < verts[i].combineVerts.Count; vOut++)
-                    {
-                        bool restart = false;
-                        for (int vIn = 0; vIn < verts[j].combineVerts.Count; vIn++)
-                        {
-                            if (Vector3.Distance(verts[i].combineVerts[vOut].point, verts[j].combineVerts[vIn].point) < combinePointsDist)
-                            {
-                                if (cleanedVerts[j].combineVerts.Count > 0)
-                                {
-                                    cleanedVerts[i].combineVerts.AddRange(verts[j].combineVerts);
-                                    cleanedVerts[j].combineVerts.Clear();
-                                    verts[j].meshID = -1;
-
-                                    //Debug.Log("Found a good match:: " + verts[i].combineVerts[vOut].point + " " + verts[j].combineVerts[vIn].point);
-                                    Debug.Log("\t" + cleanedVerts[i].meshID);
-                                    foreach (CombinePoint cp in cleanedVerts[i].combineVerts)
-                                    {
-                                        Debug.Log("\t\t" + cp.point);
-                                    }
-
-                                    List<CombinePoint> pointRemoveList = new List<CombinePoint>(); 
-
-                                    for(int save=0; save < cleanedVerts[i].combineVerts.Count; save++)
-                                    {
-                                        for (int dest = save; dest < cleanedVerts[i].combineVerts.Count; dest++)
-                                        {
-                                            if (dest != save && !cleanedVerts[i].combineVerts[dest].combined && Vector3.Distance(cleanedVerts[i].combineVerts[save].point, cleanedVerts[i].combineVerts[dest].point) < combinePointsDist)
-                                            {
-                                                cleanedVerts[i].combineVerts[dest] = new CombinePoint(cleanedVerts[i].combineVerts[dest].point, null, true);
-                                                pointRemoveList.Add(cleanedVerts[i].combineVerts[dest]);
-                                            }
-                                        }
-                                    }
-
-                                    foreach(CombinePoint pr in pointRemoveList)
-                                    {
-                                        cleanedVerts[i].combineVerts.Remove(pr);
-                                    }
-
-                                    restart = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        // If too much time has passed, we need to return control to the main game loop.
-                        if ((Time.realtimeSinceStartup - start) > FrameTime)
-                        {
-                            // Pause our work here, and continue finding vertices to remove on the next frame.
-                            yield return null;
-                            start = Time.realtimeSinceStartup;
-                        }
-
-                        if (restart)
-                            break;
-                    }
-                }
-            }
-        }
-
-
-
         for (int v = 0; v < verts.Length; v++)
         {
             if (verts[v].meshID < 0)
@@ -292,6 +222,7 @@ public class DimensionManager : Singleton<DimensionManager>
                             if(!verts[v].combineVerts[o].combined)
                             {
                                 var newPoint = (GameObject)Instantiate(PointPrefab, verts[v].combineVerts[o].point, Quaternion.identity);
+                                newPoint.name = Path.GetRandomFileName();
                                 verts[v].combineVerts[o] = new CombinePoint(verts[v].combineVerts[o].point, newPoint, true);
                                 PointList.Add(newPoint.GetComponent<ARMakePoint>());
                             }
@@ -299,6 +230,7 @@ public class DimensionManager : Singleton<DimensionManager>
                             if (!verts[v].combineVerts[i].combined)
                             {
                                 var newPoint = (GameObject)Instantiate(PointPrefab, verts[v].combineVerts[i].point, Quaternion.identity);
+                                newPoint.name = Path.GetRandomFileName();
                                 verts[v].combineVerts[i] = new CombinePoint(verts[v].combineVerts[i].point, newPoint, true);
                                 PointList.Add(newPoint.GetComponent<ARMakePoint>());
                             }
@@ -324,13 +256,14 @@ public class DimensionManager : Singleton<DimensionManager>
 
                             var distance = Vector3.Distance(verts[v].combineVerts[o].point, verts[v].combineVerts[i].point);
                             var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
+                            line.name = Path.GetRandomFileName();
                             line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
                             line.transform.Rotate(Vector3.down, 90f);
 
+                            //TIP
                             var normalV = Vector3.Cross(direction, directionFromCamera);
                             var normalF = Vector3.Cross(direction, normalV) * -1;
                             var tip = (GameObject)Instantiate(TextPrefab, centerPos, Quaternion.LookRotation(normalF));
-
                             //unit is meter
                             tip.transform.Translate(Vector3.up * 0.05f);
                             tip.GetComponent<TextMesh>().text = (distance * metersToInches) + "in";
@@ -344,11 +277,9 @@ public class DimensionManager : Singleton<DimensionManager>
                             ARMakeLine tempLine = line.GetComponent<ARMakeLine>();
                             tempLine.pointList.Add(verts[v].combineVerts[o].pointObject.GetComponent<ARMakePoint>());
                             tempLine.pointList.Add(verts[v].combineVerts[i].pointObject.GetComponent<ARMakePoint>());
-                            tempLine.Root = root;
-                            tempLine.Distance = distance;
 
-                            //var newPoint = (GameObject)Instantiate(PointPrefab, compareVerts[i].vert, Quaternion.identity);
-                            //PointList.Add(newPoint.GetComponent<ARMakePoint>());
+                            verts[v].combineVerts[o].pointObject.GetComponent<ARMakePoint>().lineList.Add(tempLine);
+                            verts[v].combineVerts[i].pointObject.GetComponent<ARMakePoint>().lineList.Add(tempLine);
 
                             // If too much time has passed, we need to return control to the main game loop.
                             if ((Time.realtimeSinceStartup - start) > FrameTime)
@@ -362,6 +293,26 @@ public class DimensionManager : Singleton<DimensionManager>
                 }
             }
         }
+
+        ARMakePoint[] pointArray = new ARMakePoint[PointList.Count];
+        PointList.CopyTo(pointArray);
+        for(int i = 0; i < pointArray.Length; i++)
+        {
+            for (int j = i; j < pointArray.Length; j++)
+            {
+                if (j != i && pointArray[i] != null && pointArray[j] != null && Vector3.Distance(pointArray[i].transform.position, pointArray[j].transform.position) < combinePointsDist)
+                {
+                    ARMakePoint removePoint = PointList[PointList.IndexOf(pointArray[i])];
+                    foreach (ARMakeLine _line in removePoint.lineList)
+                    {
+                        Debug.Log("Starting on this line now: " + _line.name + " " + removePoint.lineList.Count);
+                        pointArray[j].AddLine(_line, removePoint);
+                    }
+                    DestroyImmediate(removePoint.gameObject);
+                }
+            }
+        }
+
     }
 }
 

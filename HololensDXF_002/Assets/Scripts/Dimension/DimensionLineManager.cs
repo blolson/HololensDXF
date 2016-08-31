@@ -72,7 +72,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             tip.GetComponent<TextMesh>().text = (distance* metersToInches) + "in";
 
             var root = new GameObject();
-            lastPoint.Root.transform.parent = root.transform;
+            lastPoint.transform.parent = root.transform;
             line.transform.parent = root.transform;
             point.transform.parent = root.transform;
             tip.transform.parent = root.transform;
@@ -80,14 +80,12 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             ARMakeLine tempLine = line.GetComponent<ARMakeLine>();
             tempLine.pointList.Add(lastPoint);
             tempLine.pointList.Add(point.GetComponent<ARMakePoint>());
-            tempLine.Root = root;
             tempLine.Distance = distance;
             Lines.Push(tempLine);
 
             lastPoint = point.GetComponent<ARMakePoint>();
             lastPoint.position = point.transform.position;
             lastPoint.IsStart = false;
-            lastPoint.Root = lastPoint.gameObject;
 
             ARMakeLineGuide.Instance.UpdateSource(lastPoint);
         }
@@ -96,7 +94,6 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             lastPoint = point.GetComponent<ARMakePoint>();
             lastPoint.position = point.transform.position;
             lastPoint.IsStart = true;
-            lastPoint.Root = lastPoint.gameObject;
 
             ARMakeLineGuide.Instance.UpdateSource(lastPoint);
         }
@@ -115,7 +112,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
         if (Lines != null && Lines.Count > 0)
         {
             var lastLine = Lines.Pop();
-            Destroy(lastLine.Root);
+            Destroy(lastLine.transform.parent);
         }
 
     }
@@ -128,7 +125,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             while (Lines.Count > 0)
             {
                 var lastLine = Lines.Pop();
-                Destroy(lastLine.Root);
+                Destroy(lastLine.transform.parent);
             }
         }
     }
@@ -138,7 +135,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
     {
         if (lastPoint != null && lastPoint.IsStart)
         {
-            Destroy(lastPoint.Root);
+            Destroy(lastPoint.transform.parent);
             lastPoint = null;
         }
     }

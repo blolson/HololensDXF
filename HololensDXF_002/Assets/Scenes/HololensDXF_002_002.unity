@@ -873,7 +873,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b6523eb1277a7b44baf8ad27e52950c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scanTime: 8
+  scanTime: 4
   defaultMaterial: {fileID: 2100000, guid: d698790d3facd3d4289a13fa1243030a, type: 2}
   secondaryMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
   minimumFloors: 1
@@ -2929,7 +2929,7 @@ Prefab:
     - target: {fileID: 114000011154029958, guid: 2ed75ffdf9031c94e8bce4b3d17b9928,
         type: 2}
       propertyPath: drawVisualMeshes
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114000012698980792, guid: 2ed75ffdf9031c94e8bce4b3d17b9928,
         type: 2}
@@ -4062,8 +4062,8 @@ MonoBehaviour:
   ModeTipObject: {fileID: 1500945917}
   TextPrefab: {fileID: 1000011564080456, guid: 730f1ee216d682046871e9b19d634fcf, type: 2}
   planeConverter: {fileID: 228517268}
-  flattenPlaneDist: 0.2
-  combinePointsDist: 0.2
+  flattenPlaneDist: 0.05
+  combinePointsDist: 0.3
 --- !u!4 &928975075
 Transform:
   m_ObjectHideFlags: 0

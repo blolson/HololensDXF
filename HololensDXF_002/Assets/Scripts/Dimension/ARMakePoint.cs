@@ -6,7 +6,6 @@ public class ARMakePoint : MonoBehaviour {
     public Vector3 position;
     public List<ARMakeLine> lineList = new List<ARMakeLine>();
     //Blade: Not sure what "Root" does
-    public GameObject Root;
     public bool IsStart;
 
     public ARMakePoint()
@@ -49,8 +48,26 @@ public class ARMakePoint : MonoBehaviour {
     }
 
     // Update is called once per frame
+    public void AddLine(ARMakeLine _line, ARMakePoint _deletePoint = null)
+    {
+        if (lineList.Contains(_line))
+        {
+            Debug.LogError("This line already exists");
+            return;
+        }
+        else
+        {
+            var _newLine = _line.AddPoint(this, _deletePoint);
+            lineList.Add(_newLine);
+            Debug.Log("Just created this line: " + _newLine + " from these points:");
+            _newLine.PrintPoints();
+        }
+    }
+
+    // Update is called once per frame
     void OnDestroy()
     {
+        Debug.Log("Removing Points");
         foreach (ARMakeLine _line in lineList)
         {
             _line.RemovePoint(this);
