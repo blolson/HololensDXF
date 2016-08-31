@@ -4036,6 +4036,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 928975075}
   - 114: {fileID: 928975074}
+  - 120: {fileID: 928975076}
   m_Layer: 0
   m_Name: Measure Manager
   m_TagString: Untagged
@@ -4077,6 +4078,48 @@ Transform:
   - {fileID: 1326239547}
   m_Father: {fileID: 0}
   m_RootOrder: 3
+--- !u!120 &928975076
+LineRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 928975073}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2ebfe4f79ff049540b37b95b495b2f6c, type: 2}
+  m_SubsetIndices: 
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedWireframeHidden: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_Positions:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 1}
+  m_Parameters:
+    startWidth: 0.005
+    endWidth: 0.005
+    m_StartColor:
+      serializedVersion: 2
+      rgba: 4294967295
+    m_EndColor:
+      serializedVersion: 2
+      rgba: 4294967295
+  m_UseWorldSpace: 1
 --- !u!1 &941699159
 GameObject:
   m_ObjectHideFlags: 0
@@ -6176,6 +6219,7 @@ GameObject:
   - 114: {fileID: 1220043803}
   - 114: {fileID: 1220043802}
   - 114: {fileID: 1220043800}
+  - 114: {fileID: 1220043806}
   m_Layer: 0
   m_Name: Input
   m_TagString: Untagged
@@ -6195,6 +6239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EditorSelectKey: 32
+  EditorHoldKey: 122
 --- !u!114 &1220043802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6256,6 +6301,19 @@ Transform:
   - {fileID: 1521221437}
   m_Father: {fileID: 0}
   m_RootOrder: 4
+--- !u!114 &1220043806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1220043799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad550b253fdfc8d40aa44f1c842afe76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  guide: {fileID: 928975076}
+  originalDestination: {fileID: 1521221436}
 --- !u!1 &1231887034
 GameObject:
   m_ObjectHideFlags: 0
@@ -6710,7 +6768,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d04851195e4f4346a9257e4d6b0bd30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastPoint: {fileID: 0}
+  LinePrefab: {fileID: 1000013919465970, guid: 24292e31cfee75844898d532649e8003, type: 2}
+  TextPrefab: {fileID: 1000011564080456, guid: 730f1ee216d682046871e9b19d634fcf, type: 2}
+  PointPrefab: {fileID: 1000010230644086, guid: ad6838602d4e4e84793ca6dd0f0a8021,
+    type: 2}
 --- !u!1 &1330804376
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,6 +16,7 @@ public class HackGestureManager : Singleton<HackGestureManager>
     /// Key to press in the editor to select the currently gazed hologram
     /// </summary>
     public KeyCode EditorSelectKey = KeyCode.Space;
+    public KeyCode EditorHoldKey = KeyCode.Z;
 
     /// <summary>
     /// To select even when a hologram is not being gazed at,
@@ -61,7 +62,7 @@ public class HackGestureManager : Singleton<HackGestureManager>
    /// </summary>
     private void OnHold()
     {
-        //DimensionManager.Instance.OnPloygonClose();
+        DimensionManager.Instance.Close();
     }
 
     private void OnTap()
@@ -112,6 +113,11 @@ public class HackGestureManager : Singleton<HackGestureManager>
         if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(EditorSelectKey))
         {
             OnTap();
+        }
+
+        if (Input.GetKeyDown(EditorHoldKey))
+        {
+            OnHold();
         }
 #endif
     }

@@ -6,7 +6,7 @@ using System.Collections;
 /// </summary>
 public interface IDimensionGeometry
 {
-    void AddPoint(GameObject LinePrefab, GameObject PointPrefab, GameObject TextPrefab);
+    void AddPoint();
 
     void Delete();
 

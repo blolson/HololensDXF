@@ -106,6 +106,7 @@ namespace HoloToolkit.Unity
                 }
                 if (FocusedObject != null)
                 {
+                    Debug.Log(FocusedObject.name);
                     FocusedObject.SendMessage("OnGazeEnter", SendMessageOptions.DontRequireReceiver);
                 }
             }

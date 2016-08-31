@@ -9,7 +9,7 @@ using System;
 /// </summary>
 public class DimensionManager : Singleton<DimensionManager>
 {
-    private IDimensionGeometry manager;
+    private DimensionLineManager manager;
     public DimensionMode mode;
 
     // set up prefabs
@@ -52,9 +52,15 @@ public class DimensionManager : Singleton<DimensionManager>
     // place spatial point
     public void OnSelect()
     {
-        manager.AddPoint(LinePrefab, PointPrefab, TextPrefab);
+        manager.AddPoint();
     }
 
+    // if lastPoint exists, stop it, and cleanup
+    public void Close()
+    {
+        manager.Close();
+
+    }
     // delete latest line or geometry
     public void DeleteLine()
     {
@@ -65,25 +71,6 @@ public class DimensionManager : Singleton<DimensionManager>
     public void ClearAll()
     {
         manager.Clear();
-    }
-
-    // change measure mode
-    public void OnModeChange()
-    {
-        try  
-        {
-            manager.Reset();
-            if (mode == DimensionMode.Line)
-            {
-                mode = DimensionMode.Line;
-                manager = DimensionLineManager.Instance;
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.Log(ex.Message);
-        }
-        ModeTipObject.SetActive(true);
     }
 
     public void ConvertPlanesToLines()
