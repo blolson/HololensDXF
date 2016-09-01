@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using HoloToolkit.Unity;
 
 public class ARMakePoint : MonoBehaviour {
 
@@ -9,6 +10,8 @@ public class ARMakePoint : MonoBehaviour {
     public bool IsStart;
 
     private TraceOutline tracer;
+    private bool isMoving = false;
+    private Vector3? moveDestination;
 
     public ARMakePoint()
     {
@@ -28,17 +31,34 @@ public class ARMakePoint : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        if (isMoving)
+        {
+            //if (moveDestination != null)
+            //    gameObject.transform.position = (Vector3)moveDestination;
+            //else
+            //    gameObject.transform.position = GazeManager.Instance.RoomPosition;
+
+            gameObject.transform.position = GazeManager.Instance.RoomPosition;
+            foreach (ARMakeLine _line in lineList)
+            {
+                _line.MoveAndRedraw();
+            }
+        }
 	}
 
     public void OnGazeEnter()
     {
-        if (DimensionManager.Instance.mode == ARMakeMode.AddLine)
+        if (ARMakeManager.Instance.mode == ARMakeMode.PointMove)
+        {
+            ARMakePointManager.Instance.UpdateMoveDestination(this);
+            tracer.FadeIn();
+        }
+        else if (ARMakeManager.Instance.mode == ARMakeMode.AddLine)
         {
             ARMakeLineGuide.Instance.UpdateDestination(this);
             tracer.FadeIn();
         }
-        else if (DimensionManager.Instance.mode == ARMakeMode.Free)
+        else if (ARMakeManager.Instance.mode == ARMakeMode.Free)
         {
             tracer.FadeIn();
         }
@@ -46,13 +66,18 @@ public class ARMakePoint : MonoBehaviour {
 
     public void OnGazeLeave()
     {
-        Debug.Log("OnGazeLeave: " + gameObject.name);
-        if (DimensionManager.Instance.mode == ARMakeMode.AddLine)
+        //Debug.Log("OnGazeLeave: " + gameObject.name);
+        if (ARMakeManager.Instance.mode == ARMakeMode.PointMove)
+        {
+            ARMakePointManager.Instance.UpdateMoveDestination();
+            tracer.FadeOut();
+        }
+        else if (ARMakeManager.Instance.mode == ARMakeMode.AddLine)
         {
             ARMakeLineGuide.Instance.UpdateDestination();
             tracer.FadeOut();
         }
-        else if (DimensionManager.Instance.mode == ARMakeMode.Free)
+        else if (ARMakeManager.Instance.mode == ARMakeMode.Free)
         {
             tracer.FadeOut();
         }
@@ -60,6 +85,7 @@ public class ARMakePoint : MonoBehaviour {
 
     public void RemoveLine(ARMakeLine _line)
     {
+        Debug.Log(this + " Remove Line: " + _line);
         if(lineList.Contains(_line))
         {
             lineList.Remove(_line);
@@ -68,25 +94,48 @@ public class ARMakePoint : MonoBehaviour {
 
     public void AddLine(ARMakeLine _line, ARMakePoint _deletePoint = null)
     {
-        if (lineList.Contains(_line))
+        foreach (ARMakeLine line in lineList)
         {
-            Debug.LogError("This line already exists");
-            return;
+            Debug.Log(this + " " + line.gameObject + " " + _line.gameObject);
+            if (line.gameObject == _line.gameObject)
+            {
+                Debug.LogError("This line already exists");
+                return;
+            }
         }
+
+        Debug.Log(this + " " + lineList.Count + " " + _deletePoint + " " + _line);
+        var _newLine = _line.AddPoint(this, _deletePoint);
+        lineList.Add(_newLine);
+        Debug.Log(this + " " + lineList.Count + " " + _deletePoint + " " + _line);
+
+        foreach (ARMakeLine line in lineList)
+        {
+            Debug.Log(this + " " + line.gameObject);
+        }
+
+        //Debug.Log("Just created this line: " + _newLine + " from these points:");
+    }
+
+    public void Move(bool _state)
+    {
+        isMoving = _state;
+    }
+
+    public void SetDestination(ARMakePoint _point = null)
+    {
+        if (_point)
+            moveDestination = _point.transform.position;
         else
-        {
-            Debug.Log(this + " " + _deletePoint);
-            var _newLine = _line.AddPoint(this, _deletePoint);
-            lineList.Add(_newLine);
-            //Debug.Log("Just created this line: " + _newLine + " from these points:");
-        }
+            moveDestination = null;
     }
 
     void OnDestroy()
     {
-        //Debug.Log("Removing Points");
+        Debug.Log(gameObject.name + " Removing Points from " + lineList.Count);
         foreach (ARMakeLine _line in lineList)
         {
+            Debug.Log(_line);
             if(_line != null)
                 _line.RemovePoint(this);
         }

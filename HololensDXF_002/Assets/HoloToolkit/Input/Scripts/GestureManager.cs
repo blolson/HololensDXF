@@ -18,6 +18,7 @@ namespace HoloToolkit.Unity
         /// Key to press in the editor to select the currently gazed hologram
         /// </summary>
         public KeyCode EditorSelectKey = KeyCode.Space;
+        public KeyCode EditorHoldKey = KeyCode.V;
 
         /// <summary>
         /// To select even when a hologram is not being gazed at,
@@ -44,19 +45,35 @@ namespace HoloToolkit.Unity
         {
             // Create a new GestureRecognizer. Sign up for tapped events.
             gestureRecognizer = new GestureRecognizer();
-            gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
+            gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.Hold);
 
             gestureRecognizer.TappedEvent += GestureRecognizer_TappedEvent;
+
+            gestureRecognizer.HoldStartedEvent += GestureRecognizer_HoldStartedEvent;
 
             // Start looking for gestures.
             gestureRecognizer.StartCapturingGestures();
         }
 
+        private void GestureRecognizer_HoldStartedEvent(InteractionSourceKind source, Ray headRay)
+        {
+            OnHold();
+        }
+
+        /// <summary>
+        /// if hold gesture happen, try to finish geometry
+        /// </summary>
+        private void OnHold()
+        {
+            ARMakeManager.Instance.OnHold();
+        }
+
         private void OnTap()
         {
+            ARMakeManager.Instance.OnSelect();
             if (focusedObject != null)
             {
-                focusedObject.SendMessage("OnSelect");
+                focusedObject.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
             }
         }
 
@@ -96,6 +113,11 @@ namespace HoloToolkit.Unity
             {
                 OnTap();
             }
+
+            if (Input.GetKeyDown(EditorHoldKey))
+            {
+                OnHold();
+            }
 #endif
         }
 
@@ -103,6 +125,7 @@ namespace HoloToolkit.Unity
         {
             gestureRecognizer.StopCapturingGestures();
             gestureRecognizer.TappedEvent -= GestureRecognizer_TappedEvent;
+            gestureRecognizer.HoldStartedEvent -= GestureRecognizer_HoldStartedEvent;
         }
     }
 }

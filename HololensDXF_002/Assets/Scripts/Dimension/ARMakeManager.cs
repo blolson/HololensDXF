@@ -8,9 +8,11 @@ using System.IO;
 /// <summary>
 /// manager all measure tools here
 /// </summary>
-public class DimensionManager : Singleton<DimensionManager>
+public class ARMakeManager : Singleton<ARMakeManager>
 {
-    private DimensionLineManager manager;
+    private ARMakePointManager PM;
+    private ARMakeLineManager LM;
+
     public ARMakeMode mode;
 
     // set up prefabs
@@ -76,31 +78,67 @@ public class DimensionManager : Singleton<DimensionManager>
     void Start()
     {
         // inti measure mode
-        manager = DimensionLineManager.Instance;
+        LM = ARMakeLineManager.Instance;
+        PM = ARMakePointManager.Instance;
     }
 
     // place spatial point
     public void OnSelect()
     {
-        manager.AddPoint();
+        Debug.Log("OnSelect " + Instance.mode);
+        if (ARMakeManager.Instance.mode == ARMakeMode.PointPopup)
+        {
+            if (GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>() || GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<Button>())
+            {
+                return;
+            }
+            PM.Close();
+        }
+        else if (ARMakeManager.Instance.mode == ARMakeMode.PointMove)
+        {
+            if(GazeManager.Instance.RoomPosition != null)
+            {
+                PM.Close();
+            }
+            return;
+        }
+
+        LM.AddPoint();
     }
 
     // if lastPoint exists, stop it, and cleanup
-    public void Close()
+    public void OnHold()
     {
-        manager.Close();
-
+        if (ARMakeManager.Instance.mode == ARMakeMode.AddLine)
+        {
+            if (GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>())
+            {
+                LM.AddPoint();
+            }
+            else
+            {
+                LM.Close();
+            }
+        }
+        else if (ARMakeManager.Instance.mode == ARMakeMode.Free)
+        {
+            if (GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>())
+            {
+                GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>().OnGazeLeave();
+                PM.OnHold();
+            }
+        }
     }
     // delete latest line or geometry
     public void DeleteLine()
     {
-        manager.Delete();
+        LM.Delete();
     }
 
     // delete all lines or geometry
     public void ClearAll()
     {
-        manager.Clear();
+        LM.Clear();
     }
 
     public void ConvertPlanesToLines()
@@ -223,7 +261,7 @@ public class DimensionManager : Singleton<DimensionManager>
                             if(!verts[v].combineVerts[o].combined)
                             {
                                 var newPoint = (GameObject)Instantiate(PointPrefab, verts[v].combineVerts[o].point, Quaternion.identity);
-                                newPoint.name = Path.GetRandomFileName();
+                                newPoint.name = "POINT_"+Path.GetRandomFileName();
                                 verts[v].combineVerts[o] = new CombinePoint(verts[v].combineVerts[o].point, newPoint, true);
                                 PointList.Add(newPoint.GetComponent<ARMakePoint>());
                             }
@@ -231,7 +269,7 @@ public class DimensionManager : Singleton<DimensionManager>
                             if (!verts[v].combineVerts[i].combined)
                             {
                                 var newPoint = (GameObject)Instantiate(PointPrefab, verts[v].combineVerts[i].point, Quaternion.identity);
-                                newPoint.name = Path.GetRandomFileName();
+                                newPoint.name = "POINT_"+Path.GetRandomFileName();
                                 verts[v].combineVerts[i] = new CombinePoint(verts[v].combineVerts[i].point, newPoint, true);
                                 PointList.Add(newPoint.GetComponent<ARMakePoint>());
                             }
@@ -257,7 +295,7 @@ public class DimensionManager : Singleton<DimensionManager>
 
                             var distance = Vector3.Distance(verts[v].combineVerts[o].point, verts[v].combineVerts[i].point);
                             var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
-                            line.name = Path.GetRandomFileName();
+                            line.name = "LINE_"+Path.GetRandomFileName();
                             line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
                             line.transform.Rotate(Vector3.down, 90f);
 
@@ -279,8 +317,8 @@ public class DimensionManager : Singleton<DimensionManager>
                             tempLine.pointList.Add(verts[v].combineVerts[o].pointObject.GetComponent<ARMakePoint>());
                             tempLine.pointList.Add(verts[v].combineVerts[i].pointObject.GetComponent<ARMakePoint>());
 
-                            verts[v].combineVerts[o].pointObject.GetComponent<ARMakePoint>().lineList.Add(tempLine);
-                            verts[v].combineVerts[i].pointObject.GetComponent<ARMakePoint>().lineList.Add(tempLine);
+                            verts[v].combineVerts[o].pointObject.GetComponent<ARMakePoint>().AddLine(tempLine);
+                            verts[v].combineVerts[i].pointObject.GetComponent<ARMakePoint>().AddLine(tempLine);
 
                             // If too much time has passed, we need to return control to the main game loop.
                             if ((Time.realtimeSinceStartup - start) > FrameTime)
@@ -320,6 +358,9 @@ public class DimensionManager : Singleton<DimensionManager>
 
 public enum ARMakeMode
 {
+    Initial,
     Free,
-    AddLine
+    AddLine,
+    PointPopup,
+    PointMove
 }

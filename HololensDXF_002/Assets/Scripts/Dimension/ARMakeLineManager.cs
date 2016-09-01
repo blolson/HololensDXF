@@ -6,7 +6,7 @@ using System.IO;
 /// <summary>
 /// mananger all lines in the scene
 /// </summary>
-public class DimensionLineManager : Singleton<DimensionLineManager>
+public class ARMakeLineManager : Singleton<ARMakeLineManager>
 {
     // save all lines in scene
     private Stack<ARMakeLine> Lines = new Stack<ARMakeLine>();
@@ -22,10 +22,10 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
     // place point and lines
     public void AddPoint()
     {
-        DimensionManager.Instance.mode = ARMakeMode.AddLine;
+        ARMakeManager.Instance.mode = ARMakeMode.AddLine;
 
         var point = (GameObject)Instantiate(PointPrefab, GazeManager.Instance.HitInfo.point, Quaternion.identity);
-        point.name = Path.GetRandomFileName();
+        point.name = "POINT_"+Path.GetRandomFileName();
         bool endOnPoint = false;
 
         if (GazeManager.Instance.HitInfo.collider != null)
@@ -33,12 +33,19 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             ARMakePoint oldPoint = GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>();
             if (oldPoint != null)
             {
+                if(oldPoint == lastPoint)
+                {
+                    Close();
+                    Destroy(point);
+                    return;
+                }
+
                 point.transform.position = oldPoint.transform.position;
                 foreach (ARMakeLine oldLine in oldPoint.lineList)
                 {
                     point.GetComponent<ARMakePoint>().AddLine(oldLine, oldPoint);
                 }
-                DestroyImmediate(oldPoint.gameObject);
+                Destroy(oldPoint.gameObject);
                 endOnPoint = true;
             }
         }
@@ -84,19 +91,24 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
             tip.transform.parent = root.transform;
 
             ARMakeLine tempLine = line.GetComponent<ARMakeLine>();
+            Debug.Log("ADDING POINT " + tempLine.gameObject.name + " Adding " + lastPoint + " " + point.GetComponent<ARMakePoint>());
             tempLine.pointList.Add(lastPoint);
             tempLine.pointList.Add(point.GetComponent<ARMakePoint>());
             tempLine.Distance = distance;
             Lines.Push(tempLine);
 
+            lastPoint.AddLine(tempLine);
             lastPoint = point.GetComponent<ARMakePoint>();
             lastPoint.position = point.transform.position;
             lastPoint.IsStart = false;
+            lastPoint.AddLine(tempLine);
 
             if (endOnPoint)
                 Close();
             else
+            {
                 ARMakeLineGuide.Instance.UpdateSource(lastPoint);
+            }
         }
         else
         {
@@ -111,7 +123,7 @@ public class DimensionLineManager : Singleton<DimensionLineManager>
     // delete latest placed lines
     public void Close()
     {
-        DimensionManager.Instance.mode = ARMakeMode.Free;
+        ARMakeManager.Instance.mode = ARMakeMode.Free;
         ARMakeLineGuide.Instance.EndGuide();
         lastPoint = null;
     }

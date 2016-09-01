@@ -62,19 +62,19 @@ public class HackGestureManager : Singleton<HackGestureManager>
    /// </summary>
     private void OnHold()
     {
-        DimensionManager.Instance.Close();
+        ARMakeManager.Instance.OnHold();
     }
 
     private void OnTap()
     {
         //if user tap tip text, relative line and geometry will hide
-        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag.Equals("Tip"))
+        if (focusedObject != null && focusedObject.tag != null)
         {
             focusedObject.SendMessage("OnSelect");
         }
         else
         {
-            DimensionManager.Instance.OnSelect();
+            ARMakeManager.Instance.OnSelect();
         }
     }
 

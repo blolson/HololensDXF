@@ -50,7 +50,7 @@ public partial class SceneStateManager : Singleton<SceneStateManager> {
     IEnumerator StartFirstFrame()
     {
         yield return null;
-        currentState = SceneStates.Start;
+
         List<KeywordManager.KeywordAndResponse> newWordList = new List<KeywordManager.KeywordAndResponse>();
         foreach (StateKeywords skw in StateKeyRecList)
         {

@@ -38,6 +38,11 @@ namespace HoloToolkit.Unity
         /// </summary>
         public Vector3 Normal { get; private set; }
 
+
+        public Vector3 RoomPosition { get; private set; }
+        [Tooltip("Select the layers raycast should target specifically for the room mesh.")]
+        public LayerMask RoomRaycastLayerMask = Physics.DefaultRaycastLayers;
+
         /// <summary>
         /// Object currently being focused on.
         /// </summary>
@@ -67,7 +72,7 @@ namespace HoloToolkit.Unity
         /// Calculates the Raycast hit position and normal.
         /// </summary>
         private void UpdateRaycast()
-        {
+        {   
             // Get the raycast hit information from Unity's physics system.
             RaycastHit hitInfo;
             Hit = Physics.Raycast(gazeOrigin,
@@ -96,6 +101,19 @@ namespace HoloToolkit.Unity
                 Normal = -gazeDirection;
                 FocusedObject = null;
             }
+
+            // Get the raycast hit information from Unity's physics system.
+            RaycastHit roomHit;
+            bool hit = Physics.Raycast(gazeOrigin,
+                           gazeDirection,
+                           out roomHit,
+                           MaxGazeDistance,
+                           RoomRaycastLayerMask);
+
+            if (hit)
+                RoomPosition = roomHit.point;
+            else
+                RoomPosition = gazeOrigin + (gazeDirection * lastHitDistance);
 
             // Check if the currently hit object has changed
             if (oldFocusedObject != FocusedObject)

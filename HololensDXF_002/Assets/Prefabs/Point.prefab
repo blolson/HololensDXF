@@ -266,7 +266,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 12, y: 12, z: 12}
+  m_Size: {x: 20, y: 20, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!96 &96000012545278786
 TrailRenderer:
@@ -381,6 +381,7 @@ MonoBehaviour:
   fadeOutSpeed: 2
   fadeInSpeed: 2
   fateOutOnGazeEnter: 0
+  activeOnSpawn: 0
 --- !u!224 &224000011170987180
 RectTransform:
   m_ObjectHideFlags: 1

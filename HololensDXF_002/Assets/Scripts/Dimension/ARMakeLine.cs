@@ -13,6 +13,7 @@ public class ARMakeLine : MonoBehaviour {
 
     public ARMakeLine(Vector3 Point1, Vector3 Point2, float dist)
     {
+        Debug.Log("ADDING POINT - New Line: " + gameObject.name + " " + Point1 + " " + Point2);
         pointList.Add(new ARMakePoint(Point1));
         pointList.Add(new ARMakePoint(Point2));
         Distance = dist;
@@ -31,6 +32,7 @@ public class ARMakeLine : MonoBehaviour {
     // Update is called once per frame
     public void RemovePoint(ARMakePoint _point)
     {
+        Debug.Log("RemovePoint " + _point.name);
         if (pointList.Contains(_point))
         {
             pointList.Remove(_point);
@@ -44,7 +46,7 @@ public class ARMakeLine : MonoBehaviour {
         else if (pointList.Count < 2)
         {
             Debug.Log(gameObject.name + " Point List is too low, now destroying this line " + pointList.Count);
-            DestroyImmediate(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -53,23 +55,23 @@ public class ARMakeLine : MonoBehaviour {
     {
         if (pointList.Contains(_point))
         {
-            //Debug.Log(gameObject.name + " This point was already added.");
+            Debug.Log(gameObject.name + " This point was already added. " + _point);
             return this;
         }
         else if (pointList.Count > 1)
         {
-            //Debug.Log("There's already two points in this line's point list");
+            Debug.Log("There's already two points in this line's point list");
             if (_deletePoint == null)
             {
                 Debug.LogError("Didn't provide a _deletePoint in a list that already has 2 points, bailing out");
                 return null;
             }
-            Debug.Log(_point.name + " " + _deletePoint.name);
+            Debug.Log(gameObject.name + " " + _point.name + " " + _deletePoint.name);
             return GenerateNew(_point, _deletePoint);
         }
         else
         {
-            //Debug.Log("Adding new _point: " + _point);
+            Debug.Log("Adding new _point: " + _point + " " + _deletePoint);
             return this;
         }
     }
@@ -77,6 +79,7 @@ public class ARMakeLine : MonoBehaviour {
     // Update is called once per frame
     private ARMakeLine GenerateNew(ARMakePoint _point, ARMakePoint _deletePoint)
     {
+        PrintPoints();
         if (pointList.Count < 2)
         {
             Debug.LogError("Not enough points to draw this line.");
@@ -96,16 +99,16 @@ public class ARMakeLine : MonoBehaviour {
                 if (point != _deletePoint && point != null)
                 {
                     savePoint = pointList.IndexOf(point);
-                    Debug.Log(savePoint);
-                    Debug.Log(pointList[savePoint]);
+                    //Debug.Log(savePoint);
+                    //Debug.Log(pointList[savePoint]);
                     break;
                 }
             }
         }
 
-        Debug.Log(pointList[savePoint]);
+        //Debug.Log(pointList[savePoint]);
 
-        Debug.Log(_point.name + " " + _deletePoint.name + " " + savePoint);
+        //Debug.Log(_point.name + " " + _deletePoint.name + " " + savePoint);
         var centerPos = (pointList[savePoint].transform.position + _point.transform.position) * 0.5f;
 
         var directionFromCamera = centerPos - Camera.main.transform.position;
@@ -126,60 +129,57 @@ public class ARMakeLine : MonoBehaviour {
 
         var distance = Vector3.Distance(pointList[savePoint].transform.position, _point.transform.position);
         var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
-        line.name = Path.GetRandomFileName();
+        line.name = "LINE_"+Path.GetRandomFileName();
 
-        //Debug.Log("Just generated " + line.name);
+        Debug.Log(gameObject.name + " just generated Line: " + line.name);
         var lineScript = line.GetComponent<ARMakeLine>();
 
         line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
         line.transform.Rotate(Vector3.down, 90f);
+        lineScript.pointList.Clear();
 
+        Debug.Log("ADDING POINT " + line.name + " Adding " + pointList[savePoint] + " " + _point);
         lineScript.pointList.Add(pointList[savePoint]);
         lineScript.pointList.Add(_point);
 
         pointList[savePoint].AddLine(lineScript);
-        _point.AddLine(lineScript);
+        
+        //Blade: The calling function is _point and it will add its line from this return value.
+        //_point.AddLine(lineScript);
 
         return line.GetComponent<ARMakeLine>();
     }
 
-    //// Update is called once per frame
-    //public void Redraw()
-    //{
-    //    if (pointList.Count < 2)
-    //    {
-    //        Debug.LogError("Not enough points to draw this line.");
-    //        return;
-    //    } 
+    public void MoveAndRedraw()
+    {
+        //DpointListebug.Log(lastPoint.position + " " + point.transform.position);
+        //PrintPoints();
+        //Debug.Log("Move & Redraw: " + gameObject.name);
+        var centerPos = (pointList[0].transform.position + pointList[1].transform.position) * 0.5f;
 
-    //    //DpointListebug.Log(lastPoint.position + " " + point.transform.position);
-    //    var centerPos = (pointList[0].transform.position + pointList[1].transform.position) * 0.5f;
+        var directionFromCamera = centerPos - Camera.main.transform.position;
 
-    //    var directionFromCamera = centerPos - Camera.main.transform.position;
+        var distanceA = Vector3.Distance(pointList[0].transform.position, Camera.main.transform.position);
+        var distanceB = Vector3.Distance(pointList[1].transform.position, Camera.main.transform.position);
 
-    //    var distanceA = Vector3.Distance(pointList[0].transform.position, Camera.main.transform.position);
-    //    var distanceB = Vector3.Distance(pointList[1].transform.position, Camera.main.transform.position);
+        //Debug.Log("A: " + distanceA + ",B: " + distanceB);
+        Vector3 direction;
+        if (distanceB > distanceA || (distanceA > distanceB && distanceA - distanceB < 0.1))
+        {
+            direction = pointList[1].transform.position - pointList[0].transform.position;
+        }
+        else
+        {
+            direction = pointList[0].transform.position - pointList[1].transform.position;
+        }
 
-    //    //Debug.Log("A: " + distanceA + ",B: " + distanceB);
-    //    Vector3 direction;
-    //    if (distanceB > distanceA || (distanceA > distanceB && distanceA - distanceB < 0.1))
-    //    {
-    //        direction = pointList[1].transform.position - pointList[0].transform.position;
-    //    }
-    //    else
-    //    {
-    //        direction = pointList[0].transform.position - pointList[1].transform.position;
-    //    }
+        var distance = Vector3.Distance(pointList[0].transform.position, pointList[1].transform.position);
+        gameObject.transform.rotation = Quaternion.LookRotation(direction);
+        gameObject.transform.position = centerPos;
 
-    //    var distance = Vector3.Distance(pointList[0].transform.position, pointList[1].transform.position);
-    //    var line = (GameObject)Instantiate(LinePrefab, centerPos, Quaternion.LookRotation(direction));
-
-    //    line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
-    //    line.transform.Rotate(Vector3.down, 90f);
-
-    //    pointList[0].AddLine(line.GetComponent<ARMakeLine>());
-    //    pointList[1].AddLine(line.GetComponent<ARMakeLine>());
-    //}
+        gameObject.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
+        gameObject.transform.Rotate(Vector3.down, 90f);
+    }
 
     // Update is called once per frame
     public void PrintPoints()
@@ -194,7 +194,7 @@ public class ARMakeLine : MonoBehaviour {
     // Update is called once per frame
     void OnDestroy()
     {
-        Debug.Log("OnDestroy " + gameObject.name);
+        //Debug.Log("OnDestroy " + gameObject.name);
         foreach (ARMakePoint _point in pointList)
         {
             _point.RemoveLine(this);
