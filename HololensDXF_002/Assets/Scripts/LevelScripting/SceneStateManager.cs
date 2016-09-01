@@ -92,5 +92,6 @@ public partial class SceneStateManager : Singleton<SceneStateManager> {
         }
 
         keywordManager.UpdateKeywordRecognizer(newWordList.ToArray());
+        keywordManager.StartKeywordRecognizer();
     }
 }

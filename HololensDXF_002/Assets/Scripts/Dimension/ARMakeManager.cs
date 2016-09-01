@@ -346,13 +346,21 @@ public class ARMakeManager : Singleton<ARMakeManager>
                     {
                         //Debug.Log("Starting on this line now: " + _line.name + " " + removePoint.lineList.Count);
                         pointArray[j].AddLine(_line, removePoint);
+
+                        // If too much time has passed, we need to return control to the main game loop.
+                        if ((Time.realtimeSinceStartup - start) > FrameTime)
+                        {
+                            // Pause our work here, and continue finding vertices to remove on the next frame.
+                            yield return null;
+                            start = Time.realtimeSinceStartup;
+                        }
                     }
                     DestroyImmediate(removePoint.gameObject);
                 }
             }
         }
 
-        SceneStateManager.Instance.Progress();
+        SceneStateManager.Instance.Progress(SceneStateManager.SceneStates.Edit);
     }
 }
 

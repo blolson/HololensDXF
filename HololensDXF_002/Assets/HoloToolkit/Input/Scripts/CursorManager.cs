@@ -41,7 +41,12 @@ public partial class CursorManager : Singleton<CursorManager>
             return;
         }
 
-        if (GazeManager.Instance.Hit)
+        if(HandsManager.Instance.HandDetected)
+        {
+            CursorOnHolograms.SetActive(false);
+            CursorOffHolograms.SetActive(false);
+        }
+        else if (GazeManager.Instance.Hit)
         {
             CursorOnHolograms.SetActive(true);
             CursorOffHolograms.SetActive(false);

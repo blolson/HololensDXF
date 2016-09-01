@@ -91,6 +91,17 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
         // Check to see if we have enough floors (minimumFloors) to start processing.
         if (walls.Count >= minimumWalls)
         {
+            //Blade: Stop trying to regenerate the mesh, the player has decided to move on to the next step
+            if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.Scan)
+            {
+                SceneStateManager.Instance.Progress(SceneStateManager.SceneStates.ScanGood);
+            }
+            else if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.GenerateStart)
+            {
+                Debug.Log("Bail out because we've already started the generation process");
+                return;
+            }
+
             // Reduce our triangle count by removing any triangles
             // from SpatialMapping meshes that intersect with active planes.
             RemoveVertices(SurfaceMeshesToPlanes.Instance.ActivePlanes);
@@ -98,18 +109,6 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
             // After scanning is over, switch to the secondary (occlusion) material.
             //Blade: Commenting this out because we don't want the player to see the mesh right now
             //SpatialMappingManager.Instance.SetSurfaceMaterial(secondaryMaterial);
-
-            //Blade: Stop trying to regenerate the mesh, the player has decided to move on to the next step
-            if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.Scan)
-            {
-                SceneStateManager.Instance.Progress();
-                return;
-            }
-            else if (SceneStateManager.Instance.currentState == SceneStateManager.SceneStates.Generate)
-            {
-                SceneStateManager.Instance.Progress();
-                return;
-            }
 
 #if !UNITY_EDITOR
             // Re-enter scanning mode so the user can find more surfaces before processing.
@@ -123,7 +122,7 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
 
     public void StopScanning()
     {
-        SceneStateManager.Instance.Progress();
+        SceneStateManager.Instance.Progress(SceneStateManager.SceneStates.GenerateStart);
         if (SpatialMappingManager.Instance.IsObserverRunning())
         {
             // Stop the observer.

@@ -11,5 +11,7 @@ EditorBuildSettings:
     path: Assets/HololensDXF_002_001.unity
   - enabled: 0
     path: Assets/Origami.unity
-  - enabled: 1
+  - enabled: 0
     path: Assets/HoloToolkit-Examples/SpatialMappingComponent/Example.unity
+  - enabled: 1
+    path: Assets/Scenes/HololensDXF_002_002.unity
