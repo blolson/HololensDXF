@@ -30,7 +30,7 @@ public class ARMakeLineManager : Singleton<ARMakeLineManager>
 
         if (GazeManager.Instance.HitInfo.collider != null)
         {
-            ARMakePoint oldPoint = GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>();
+            ARMakePoint oldPoint = GazeManager.Instance.HitInfo.collider.transform.parent.GetComponent<ARMakePoint>();
             if (oldPoint != null)
             {
                 if(oldPoint == lastPoint)
@@ -47,6 +47,9 @@ public class ARMakeLineManager : Singleton<ARMakeLineManager>
                 }
                 Destroy(oldPoint.gameObject);
                 endOnPoint = true;
+
+                if (lastPoint == null && oldPoint.ifLocked())
+                    point.GetComponent<ARMakePoint>().Lock(true);
             }
         }
 
@@ -76,25 +79,33 @@ public class ARMakeLineManager : Singleton<ARMakeLineManager>
             line.transform.localScale = new Vector3(distance, defaultLineScale, defaultLineScale);
             line.transform.Rotate(Vector3.down, 90f);
 
+            string id = Path.GetRandomFileName();
+            line.name = "LINE_" + id;
+
             var normalV = Vector3.Cross(direction, directionFromCamera);
             var normalF = Vector3.Cross(direction, normalV) * -1;
-            var tip = (GameObject)Instantiate(TextPrefab, centerPos, Quaternion.LookRotation(normalF));
 
-            //unit is meter
-            tip.transform.Translate(Vector3.up * 0.05f);
-            tip.GetComponent<TextMesh>().text = (distance* metersToInches) + "in";
+            var dimension = (GameObject)Instantiate(TextPrefab, centerPos, Quaternion.LookRotation(normalF));
+            dimension.transform.Translate(Vector3.up * 0.05f);
+            dimension.name = "DIMENSION_" + id;
 
-            var root = new GameObject();
-            lastPoint.transform.parent = root.transform;
-            line.transform.parent = root.transform;
-            point.transform.parent = root.transform;
-            tip.transform.parent = root.transform;
+            lastPoint.transform.parent = ARMakeManager.Instance.ARMakeObjects.transform;
+            line.transform.parent = ARMakeManager.Instance.ARMakeObjects.transform;
+            point.transform.parent = ARMakeManager.Instance.ARMakeObjects.transform;
+            dimension.transform.parent = ARMakeManager.Instance.ARMakeObjects.transform;
 
             ARMakeLine tempLine = line.GetComponent<ARMakeLine>();
             Debug.Log("ADDING POINT " + tempLine.gameObject.name + " Adding " + lastPoint + " " + point.GetComponent<ARMakePoint>());
             tempLine.pointList.Add(lastPoint);
             tempLine.pointList.Add(point.GetComponent<ARMakePoint>());
             tempLine.Distance = distance;
+            tempLine.SetDimension(dimension.GetComponent<ARMakeDimension>());
+            dimension.GetComponent<ARMakeDimension>().SetLine(line);
+
+            Debug.Log(" " + Vector3.Angle(direction, Vector3.up));
+            Vector3 _dimensionPos = Vector3.Angle(direction, Vector3.up) > 45f && Vector3.Angle(direction, Vector3.down) > 45f ? Vector3.up : Vector3.right;
+            dimension.GetComponent<ARMakeDimension>().MoveAndRedraw(distance, line.transform.position, _dimensionPos);
+
             Lines.Push(tempLine);
 
             lastPoint.AddLine(tempLine);

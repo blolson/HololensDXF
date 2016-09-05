@@ -1062,7 +1062,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7670e88d3a887cb4da82fcd206b6cc6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  popupPoint: {fileID: 0}
+  UI: {fileID: 1000012246580870}
+  moveIcon: {fileID: 1000012193394566}
+  trashIcon: {fileID: 1000010809120640}
+  visualScale: 0.015
 --- !u!114 &114000011416796152
 MonoBehaviour:
   m_ObjectHideFlags: 1

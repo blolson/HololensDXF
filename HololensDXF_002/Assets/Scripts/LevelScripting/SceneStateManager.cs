@@ -10,6 +10,8 @@ public partial class SceneStateManager : Singleton<SceneStateManager> {
     public enum SceneStates { Start, Scan, ScanGood, Generate, GenerateStart, Edit, Email, Restart };
     public SceneStates currentState;
 
+    public bool TIPS_ENABLED = false;
+
     [System.Serializable]
     public struct StateKeywords
     {

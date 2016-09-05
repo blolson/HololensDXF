@@ -14,7 +14,7 @@ namespace HoloToolkit.Unity
         [Tooltip("Maximum gaze distance, in meters, for calculating a hit.")]
         public float MaxGazeDistance = 15.0f;
 
-        [Tooltip("Select the layers raycast should target.")]
+        [Tooltip("Select the layers raycast should target.")] 
         public LayerMask RaycastLayerMask = Physics.DefaultRaycastLayers;
 
         /// <summary>

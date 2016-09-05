@@ -26,16 +26,16 @@ namespace HoloToolkit.Unity
                 Debug.LogError("Must have a GazeManager somewhere in the scene.");
                 return;
             }
-        }
 
-        void Awake()
-        {
             if ((GazeManager.Instance.RaycastLayerMask & this.gameObject.layer) == 0)
             {
                 Debug.LogError("The cursor has a layer that is checked in the GazeManager's Raycast Layer Mask.  Change the cursor layer (e.g.: to Ignore Raycast) or uncheck the layer in GazeManager: " +
                     LayerMask.LayerToName(this.gameObject.layer));
             }
+        }
 
+        void Awake()
+        {
             meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
 
             if (meshRenderer == null)

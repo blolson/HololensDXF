@@ -4,8 +4,8 @@ using HoloToolkit.Unity;
 
 public class ARMakePointManager : Singleton<ARMakePointManager>
 {
+    public LayerMask PointMove_RaycastLayers;
     public GameObject PopupPrefab;
-
     private GameObject popup;
 
     // Use this for initialization
@@ -24,16 +24,16 @@ public class ARMakePointManager : Singleton<ARMakePointManager>
 
         if (GazeManager.Instance.HitInfo.collider != null)
         {
-            ARMakePoint popupPoint = GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>();
+            ARMakePoint popupPoint = GazeManager.Instance.HitInfo.collider.transform.parent.GetComponent<ARMakePoint>();
             popup = (GameObject)Instantiate(PopupPrefab, popupPoint.transform.position, Quaternion.identity);
-            popup.GetComponent<PointPopup>().popupPoint = popupPoint;
+            popup.GetComponent<PointPopup>().SetPoint(popupPoint);
         }
     }
 
     public void UpdateMoveDestination(ARMakePoint _point = null)
     {
         if (popup != null)
-            popup.GetComponent<PointPopup>().popupPoint.SetDestination(_point);
+            popup.GetComponent<PointPopup>().GetPoint().SetDestination(_point);
     }
 
     public void Close()
@@ -45,14 +45,14 @@ public class ARMakePointManager : Singleton<ARMakePointManager>
         Debug.Log("\n");
         if (ARMakeManager.Instance.mode == ARMakeMode.PointMove)
         {
-            popup.GetComponent<PointPopup>().popupPoint.Move(false);
+            popup.GetComponent<PointPopup>().GetPoint().Move(false);
 
             if (GazeManager.Instance.HitInfo.collider != null)
             {
-                ARMakePoint oldPoint = GazeManager.Instance.HitInfo.collider.gameObject.GetComponent<ARMakePoint>();
+                ARMakePoint oldPoint = GazeManager.Instance.HitInfo.collider.transform.parent.GetComponent<ARMakePoint>();
                 if (oldPoint != null)
                 {
-                    ARMakePoint point = popup.GetComponent<PointPopup>().popupPoint;
+                    ARMakePoint point = popup.GetComponent<PointPopup>().GetPoint();
 
                     point.transform.position = oldPoint.transform.position;
                     foreach (ARMakeLine oldLine in oldPoint.lineList)
@@ -63,7 +63,8 @@ public class ARMakePointManager : Singleton<ARMakePointManager>
                             Debug.Log("CHECKING LINE " + _line.pointList[0] + " " + _line.pointList[1] + " " + oldLine.pointList[0] + " " + oldLine.pointList[1] + " " + oldPoint.gameObject.name);
                             if (_line.pointList.Count > 1)
                             {
-                                if (oldLine.pointList.Contains(_line.pointList[1]) || oldLine.pointList.Contains(_line.pointList[0]))
+                                ARMakePoint toCheck = _line.pointList[1] == point ? _line.pointList[0] : _line.pointList[1];
+                                if (oldLine.pointList.Contains(_line.pointList[0]))
                                 {
                                     Debug.Log("SAME LINE, Ignore...");
                                     sameLine = true;
@@ -84,11 +85,14 @@ public class ARMakePointManager : Singleton<ARMakePointManager>
                     }
                 }
             }
-            popup.GetComponent<PointPopup>().popupPoint.gameObject.GetComponent<BoxCollider>().enabled = true;
+            popup.GetComponent<PointPopup>().GetPoint().GetCollider().enabled = true;
         }
 
         ARMakeManager.Instance.mode = ARMakeMode.Free;
-        if(popup != null)
+
+        GazeManager.Instance.RaycastLayerMask |= ARMakeManager.Instance.Free_RaycastLayers;
+
+        if (popup != null)
             Destroy(popup);
     }
 }

@@ -38,10 +38,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114000011154029958
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -55,7 +55,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PhysicsLayer: 31
   surfaceMaterial: {fileID: 2100000, guid: d698790d3facd3d4289a13fa1243030a, type: 2}
-  autoStartObserver: 1
+  autoStartObserver: 0
   drawVisualMeshes: 1
   castShadows: 0
 --- !u!114 &114000012149591842
@@ -69,7 +69,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13d883c0118351e4890753200e0ac916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomModel: {fileID: 0}
+  roomModel: {fileID: 100006, guid: a6f5d79567d5c4947a6c9837c769f870, type: 3}
+  LoadRoomModel: 1
 --- !u!114 &114000012698980792
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -81,6 +82,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a98b181acba5549af3d852c7664623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrianglesPerCubicMeter: 500
+  TrianglesPerCubicMeter: 300
   Extents: {x: 10, y: 10, z: 10}
   TimeBetweenUpdates: 3.5

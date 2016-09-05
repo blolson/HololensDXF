@@ -32,10 +32,10 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - dimension
+  - line
+  - plane
+  - point
   - room
   m_SortingLayers:
   - name: Default

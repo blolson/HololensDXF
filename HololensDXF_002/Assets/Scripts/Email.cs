@@ -14,7 +14,6 @@ public class Email : MonoBehaviour
 
     IEnumerator UploadLevel()
     {
-
         //converting the xml to bytes to be ready for upload
         byte[] dxfData = UnityEngine.Windows.File.ReadAllBytes(Application.persistentDataPath.ToString() + "/test.dxf");
 

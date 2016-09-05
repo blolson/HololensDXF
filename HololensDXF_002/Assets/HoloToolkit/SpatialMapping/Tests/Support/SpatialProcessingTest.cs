@@ -28,6 +28,8 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
     /// </summary>
     private bool meshesProcessed = false;
 
+    private bool isGeneratingInitialCAD = false;
+
     /// <summary>
     /// GameObject initialization.
     /// </summary>
@@ -82,6 +84,11 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
     /// <param name="args">Args for the event.</param>
     private void SurfaceMeshesToPlanes_MakePlanesComplete(object source, System.EventArgs args)
     {
+        if (isGeneratingInitialCAD)
+        {
+            SceneStateManager.Instance.Progress(SceneStateManager.SceneStates.GenerateStart);
+        }
+
         // Collection of floor planes that we can use to set horizontal items on.
         List<GameObject> floors = new List<GameObject>();
         List<GameObject> walls = new List<GameObject>();
@@ -101,14 +108,15 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
                 Debug.Log("Bail out because we've already started the generation process");
                 return;
             }
+        }
 
-            // Reduce our triangle count by removing any triangles
-            // from SpatialMapping meshes that intersect with active planes.
-            RemoveVertices(SurfaceMeshesToPlanes.Instance.ActivePlanes);
+        // Reduce our triangle count by removing any triangles
+        // from SpatialMapping meshes that intersect with active planes.
+        //RemoveVertices(SurfaceMeshesToPlanes.Instance.ActivePlanes);
 
-            // After scanning is over, switch to the secondary (occlusion) material.
-            //Blade: Commenting this out because we don't want the player to see the mesh right now
-            //SpatialMappingManager.Instance.SetSurfaceMaterial(secondaryMaterial);
+        // After scanning is over, switch to the secondary (occlusion) material.
+        //Blade: Commenting this out because we don't want the player to see the mesh right now
+        //SpatialMappingManager.Instance.SetSurfaceMaterial(secondaryMaterial);
 
 #if !UNITY_EDITOR
             // Re-enter scanning mode so the user can find more surfaces before processing.
@@ -117,12 +125,10 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
             // Re-process spatial data after scanning completes.
             meshesProcessed = false;
 #endif
-        }
     }
 
     public void StopScanning()
     {
-        SceneStateManager.Instance.Progress(SceneStateManager.SceneStates.GenerateStart);
         if (SpatialMappingManager.Instance.IsObserverRunning())
         {
             // Stop the observer.
@@ -134,6 +140,25 @@ public class SpatialProcessingTest : Singleton<SpatialProcessingTest>
 
         // Set meshesProcessed to true.
         meshesProcessed = true;
+
+        isGeneratingInitialCAD = true;
+    }
+
+    public void ResumeScanning()
+    {
+        if (SpatialMappingManager.Instance.IsObserverRunning())
+        {
+            // Stop the observer.
+            SpatialMappingManager.Instance.StopObserver();
+        }
+
+        // Call CreatePlanes() to generate planes.
+        CreatePlanes();
+
+        // Set meshesProcessed to true.
+        meshesProcessed = true;
+
+        isGeneratingInitialCAD = false;
     }
 
     /// <summary>

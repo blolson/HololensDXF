@@ -22,8 +22,8 @@ public class TipControl : MonoBehaviour {
 
     public void OnGazeEnter()
     {
-        if (dirIndicator.DoesDirectionIndicatorExist() != false)
-            enabled = false;
+        if (dirIndicator != null && dirIndicator.DoesDirectionIndicatorExist())
+            dirIndicator.enabled = false;
     }
 
     public void OnGazeLeave()
@@ -32,7 +32,7 @@ public class TipControl : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void LateUpdate () {
+    void Update () {
         if (currentState == FadeState.fadeOut)
         {
             var render = trail.material;
@@ -60,6 +60,13 @@ public class TipControl : MonoBehaviour {
 
     public void FadeOut(float _delay = 0f)
     {
+        StopCoroutine("_FadeIn");
+
+        if (!gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         delay = _delay;
         for (int i = 0; i < textArray.Length; i++)
             textArray[i].CrossFadeAlpha(1, 0f, false);
@@ -72,7 +79,7 @@ public class TipControl : MonoBehaviour {
         color.a = 1f;
         render.color = color;
 
-        StartCoroutine(_FadeOut());
+        StartCoroutine("_FadeOut");
     }
 
     IEnumerator _FadeOut()
@@ -89,8 +96,16 @@ public class TipControl : MonoBehaviour {
 
     public void FadeIn(float _delay = 0f)
     {
+        if (!SceneStateManager.Instance.TIPS_ENABLED)
+            return;
+
+        StopCoroutine("_FadeOut");
+        gameObject.transform.position = Camera.main.transform.forward * 1.5f;
+
         delay = _delay;
-        gameObject.SetActive(true);
+        if(!gameObject.activeInHierarchy)
+            gameObject.SetActive(true);
+
         for (int i = 0; i < textArray.Length; i++)
             textArray[i].CrossFadeAlpha(0, 0f, false);
 
@@ -102,7 +117,7 @@ public class TipControl : MonoBehaviour {
         color.a = 0;
         render.color = color;
 
-        StartCoroutine(_FadeIn());
+        StartCoroutine("_FadeIn");
     }
 
     IEnumerator _FadeIn()
