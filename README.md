@@ -1,5 +1,4 @@
 # Hololens->DXF
-## Generated in Unity
 ### Blade Olson (blolson)
 
 ## Video Demonstration
